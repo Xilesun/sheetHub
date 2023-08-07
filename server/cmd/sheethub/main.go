@@ -7,6 +7,7 @@ import (
 	"github.com/Xilesun/sheethub/server/app"
 	"github.com/Xilesun/sheethub/server/infra/config"
 	"github.com/Xilesun/sheethub/server/infra/db"
+	"github.com/Xilesun/sheethub/server/infra/logger"
 )
 
 func main() {
@@ -14,12 +15,14 @@ func main() {
 	flag.Parse()
 	config, err := config.Read(*configFile)
 	if err != nil {
-		panic(err)
+		logger.Panicf("Failed to read config: %v", err)
 	}
 	database, err := db.SetupDB(context.Background(), config.DB)
 	if err != nil {
-		panic(err)
+		logger.Panicf("Failed to setup database: %v", err)
 	}
 	app := app.New(database)
-	app.Start()
+	if err := app.Start(); err != nil {
+		logger.Panicf("Failed to start application: %v", err)
+	}
 }

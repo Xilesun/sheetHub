@@ -3,10 +3,10 @@ package db
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	"github.com/Xilesun/sheethub/server/infra/config"
 	"github.com/Xilesun/sheethub/server/infra/constants"
+	"github.com/Xilesun/sheethub/server/infra/errs"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
@@ -34,11 +34,11 @@ func (db *DB) getDSN(config config.DBConfig) (string, schema.Dialect, error) {
 	switch config.Dialect {
 	case constants.DialectSQLite:
 		if config.DSN == "" {
-			return "", sqlitedialect.New(), errors.New("DSN is required for SQLite")
+			return "", sqlitedialect.New(), errs.New(errs.ErrDBConnect, "DSN is required for SQLite")
 		}
 		return config.DSN, nil, nil
 	default:
-		return "", nil, errors.New("Unsupported dialect")
+		return "", nil, errs.New(errs.ErrDBConnect, "Unsupported dialect")
 	}
 }
 

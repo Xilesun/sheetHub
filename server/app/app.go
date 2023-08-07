@@ -2,9 +2,12 @@ package app
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/Xilesun/sheethub/server/app/api"
+	"github.com/Xilesun/sheethub/server/infra/config"
 	"github.com/Xilesun/sheethub/server/infra/db"
+	"github.com/Xilesun/sheethub/server/infra/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -28,6 +31,8 @@ func New(db *db.DB) IApp {
 		App: fiber.New(),
 	}
 	app.Install(context.Background())
+
+	app.Use(logger.Middleware)
 	app.Mount("/api", api.Routes())
 	return app
 }
@@ -47,5 +52,6 @@ func (app *App) Install(ctx context.Context) error {
 
 // Start starts the application.
 func (app *App) Start() error {
-	return app.Listen(":3000")
+	port := strconv.Itoa(config.Get().App.Port)
+	return app.Listen(":" + port)
 }

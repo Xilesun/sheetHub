@@ -10,6 +10,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// AppConfig is the configuration for the application.
+type AppConfig struct {
+	Env  string `yaml:"env" env:"ENV"`
+	Port int    `yaml:"port" env:"PORT"`
+}
+
 // DBConfig is the configuration for the database.
 type DBConfig struct {
 	DSN      string            `yaml:"dsn" env:"DSN"`
@@ -21,9 +27,15 @@ type DBConfig struct {
 	Database string            `yaml:"database" env:"DATABASE"`
 }
 
+// LogConfig is the configuration for the logger.
+type LogConfig struct {
+}
+
 // Config is the configuration for the application.
 type Config struct {
-	DB DBConfig `yaml:"db" envPrefix:"DB_"`
+	App AppConfig `yaml:"app" envPrefix:"APP_"`
+	DB  DBConfig  `yaml:"db" envPrefix:"DB_"`
+	Log LogConfig `yaml:"log" envPrefix:"LOG_"`
 }
 
 var config *atomic.Value
@@ -72,4 +84,9 @@ func Read(file string) (*Config, error) {
 		}
 	}
 	return config.Load().(*Config), nil
+}
+
+// Get returns the configuration.
+func Get() *Config {
+	return config.Load().(*Config)
 }
