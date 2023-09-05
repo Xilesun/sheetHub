@@ -6,7 +6,7 @@
     "dev:client": "cd client && pnpm run dev",
     "dev:server": "air -d",
     "build:client": "cd client && tsc && pnpm run build",
-    "build:server": "go build server/cmd/main.go",
+    "build:server": "go build server/cmd/sheethub/main.go",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
