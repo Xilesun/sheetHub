@@ -72,6 +72,7 @@ func readFromYAML(file string) error {
 
 // Read reads the configuration from config YAML file or .env file or environment variables.
 func Read(file string) (*Config, error) {
+	config = new(atomic.Value)
 	if file == "" {
 		err := readFromEnv()
 		if err != nil {

@@ -2,13 +2,16 @@ package app
 
 import (
 	"context"
+	"net/http"
 	"strconv"
 
+	"github.com/Xilesun/sheethub/client"
 	"github.com/Xilesun/sheethub/server/app/api"
 	"github.com/Xilesun/sheethub/server/infra/config"
 	"github.com/Xilesun/sheethub/server/infra/db"
 	"github.com/Xilesun/sheethub/server/infra/logger"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
 )
 
 // IApp is the interface that defines the application.
@@ -33,6 +36,10 @@ func New(db *db.DB) IApp {
 	app.Install(context.Background())
 
 	app.Use(logger.Middleware)
+	app.Use("/", filesystem.New(filesystem.Config{
+		Root:       http.FS(client.EmbedDirStatic),
+		PathPrefix: "dist",
+	}))
 	app.Mount("/api", api.Routes())
 	return app
 }

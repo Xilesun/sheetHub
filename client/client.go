@@ -2,7 +2,7 @@ package client
 
 import "embed"
 
-// Embed a directory
+// EmbedDirStatic is the embedded directory of the static files.
 //
 //go:embed dist
 var EmbedDirStatic embed.FS

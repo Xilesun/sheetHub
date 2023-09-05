@@ -15,11 +15,11 @@ func main() {
 	flag.Parse()
 	config, err := config.Read(*configFile)
 	if err != nil {
-		logger.Panicf("Failed to read config: %v", err)
+		logger.Errorf("Failed to read config: %v", err)
 	}
 	database, err := db.SetupDB(context.Background(), config.DB)
 	if err != nil {
-		logger.Panicf("Failed to setup database: %v", err)
+		logger.Errorf("Failed to setup database: %v", err)
 	}
 	app := app.New(database)
 	if err := app.Start(); err != nil {
