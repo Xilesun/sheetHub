@@ -33,14 +33,7 @@ func New(db *db.DB) IApp {
 		DB:  db,
 		App: fiber.New(),
 	}
-	app.Install(context.Background())
-
 	app.Use(logger.Middleware)
-	app.Use("/", filesystem.New(filesystem.Config{
-		Root:       http.FS(client.EmbedDirStatic),
-		PathPrefix: "dist",
-	}))
-	app.Mount("/api", api.Routes())
 	return app
 }
 
@@ -59,6 +52,12 @@ func (app *App) Install(ctx context.Context) error {
 
 // Start starts the application.
 func (app *App) Start() error {
+	app.Use("/", filesystem.New(filesystem.Config{
+		Root:       http.FS(client.EmbedDirStatic),
+		PathPrefix: "dist",
+	}))
+	app.Mount("/api", api.Routes())
+
 	port := strconv.Itoa(config.Get().App.Port)
 	return app.Listen(":" + port)
 }

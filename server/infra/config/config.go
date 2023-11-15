@@ -1,13 +1,11 @@
 package config
 
 import (
-	"os"
 	"sync/atomic"
 
 	"github.com/Xilesun/sheethub/server/infra/constants"
-	"github.com/caarlos0/env/v9"
-	"github.com/joho/godotenv"
-	"gopkg.in/yaml.v3"
+	"github.com/Xilesun/sheethub/server/infra/logger"
+	"github.com/spf13/viper"
 )
 
 // AppConfig is the configuration for the application.
@@ -33,57 +31,39 @@ type LogConfig struct {
 
 // Config is the configuration for the application.
 type Config struct {
-	App AppConfig `yaml:"app" envPrefix:"APP_"`
-	DB  DBConfig  `yaml:"db" envPrefix:"DB_"`
-	Log LogConfig `yaml:"log" envPrefix:"LOG_"`
+	App     AppConfig `yaml:"app" envPrefix:"APP_"`
+	DB      DBConfig  `yaml:"db" envPrefix:"DB_"`
+	Log     LogConfig `yaml:"log" envPrefix:"LOG_"`
+	Storage string    `yaml:"storage" env:"STORAGE"`
 }
 
 var config *atomic.Value
 
-func readFromEnv() error {
-	cfg := &Config{}
-	var envMp map[string]string
-	envMp, err := godotenv.Read()
-	if err != nil {
-		return err
+// Init initializes viper.
+func Init(file string) {
+	if file != "" {
+		viper.SetConfigFile(file)
+		return
 	}
-	opts := env.Options{
-		Environment: envMp,
-	}
-	if err := env.ParseWithOptions(cfg, opts); err != nil {
-		return err
-	}
-	config.Store(cfg)
-	return nil
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
 }
 
-func readFromYAML(file string) error {
+// Read reads the configuration.
+func Read() (*Config, error) {
 	cfg := &Config{}
-	conf, err := os.ReadFile(file)
-	if err != nil {
-		return readFromEnv()
-	}
-	if err := yaml.Unmarshal(conf, cfg); err != nil {
-		return readFromEnv()
-	}
-	config.Store(cfg)
-	return nil
-}
-
-// Read reads the configuration from config YAML file or .env file or environment variables.
-func Read(file string) (*Config, error) {
 	config = new(atomic.Value)
-	if file == "" {
-		err := readFromEnv()
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		err := readFromYAML(file)
-		if err != nil {
-			return nil, err
-		}
+	if err := viper.ReadInConfig(); err != nil {
+		logger.Errorf("Failed to read config file: %v", err)
+		return nil, err
 	}
+	if err := viper.Unmarshal(cfg); err != nil {
+		logger.Errorf("Unable to decode config, %v", err)
+		return nil, err
+	}
+	config.Store(cfg)
 	return config.Load().(*Config), nil
 }
 
