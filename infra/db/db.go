@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/Xilesun/sheethub/server/infra/config"
-	"github.com/Xilesun/sheethub/server/infra/constants"
-	"github.com/Xilesun/sheethub/server/infra/errs"
+	"github.com/Xilesun/sheethub/infra/config"
+	"github.com/Xilesun/sheethub/infra/constants"
+	"github.com/Xilesun/sheethub/infra/errs"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"

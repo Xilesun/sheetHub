@@ -3,7 +3,7 @@ package migrations
 import (
 	"context"
 
-	"github.com/Xilesun/sheethub/server/models"
+	"github.com/Xilesun/sheethub/models"
 	"github.com/uptrace/bun"
 )
 

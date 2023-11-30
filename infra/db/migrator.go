@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Xilesun/sheethub/server/migrations"
+	"github.com/Xilesun/sheethub/migrations"
 	"github.com/uptrace/bun/migrate"
 )
 

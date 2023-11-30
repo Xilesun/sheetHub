@@ -3,8 +3,8 @@ package config
 import (
 	"sync/atomic"
 
-	"github.com/Xilesun/sheethub/server/infra/constants"
-	"github.com/Xilesun/sheethub/server/infra/logger"
+	"github.com/Xilesun/sheethub/infra/constants"
+	"github.com/Xilesun/sheethub/infra/logger"
 	"github.com/spf13/viper"
 )
 
@@ -39,12 +39,7 @@ type Config struct {
 
 var config *atomic.Value
 
-// Init initializes viper.
-func Init(file string) {
-	if file != "" {
-		viper.SetConfigFile(file)
-		return
-	}
+func init() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")

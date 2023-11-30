@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 )
 
@@ -11,12 +10,6 @@ func init() {
 	zapLogger, _ := zap.NewProduction()
 	defer zapLogger.Sync()
 	logger = zapLogger.Sugar()
-}
-
-// Middleware is the middleware that adds the logger to the context.
-func Middleware(c *fiber.Ctx) error {
-	c.Locals("logger", logger)
-	return c.Next()
 }
 
 // Infof logs a message at the info log level.
