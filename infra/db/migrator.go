@@ -16,29 +16,31 @@ type IMigrator interface {
 
 // Migrator is the type of the database migrator.
 type Migrator struct {
+	ctx context.Context
 	*migrate.Migrator
 }
 
 // NewMigrator creates a new database migrator.
-func NewMigrator(ctx context.Context, db *DB) (*Migrator, error) {
+func NewMigrator(db *DB) (*Migrator, error) {
 	migrator := migrate.NewMigrator(db.Client, migrations.Migrations)
-	err := migrator.Init(ctx)
+	err := migrator.Init(db.ctx)
 	if err != nil {
 		return nil, err
 	}
 	return &Migrator{
+		ctx:      db.ctx,
 		Migrator: migrator,
 	}, nil
 }
 
 // Up migrates the database up.
-func (m *Migrator) Up(ctx context.Context) error {
-	if err := m.Lock(ctx); err != nil {
+func (m *Migrator) Up() error {
+	if err := m.Lock(m.ctx); err != nil {
 		return err
 	}
-	defer m.Unlock(ctx)
+	defer m.Unlock(m.ctx)
 
-	group, err := m.Migrate(ctx)
+	group, err := m.Migrate(m.ctx)
 	if err != nil {
 		return err
 	}
@@ -51,13 +53,13 @@ func (m *Migrator) Up(ctx context.Context) error {
 }
 
 // Down migrates the database down.
-func (m *Migrator) Down(ctx context.Context) error {
-	if err := m.Lock(ctx); err != nil {
+func (m *Migrator) Down() error {
+	if err := m.Lock(m.ctx); err != nil {
 		return err
 	}
-	defer m.Unlock(ctx)
+	defer m.Unlock(m.ctx)
 
-	group, err := m.Rollback(ctx)
+	group, err := m.Rollback(m.ctx)
 	if err != nil {
 		return err
 	}

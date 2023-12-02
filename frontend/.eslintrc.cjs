@@ -10,5 +10,6 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    'require-jsdoc': 'off',
   },
 }

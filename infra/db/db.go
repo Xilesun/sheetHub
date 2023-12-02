@@ -15,18 +15,21 @@ import (
 
 // DB is the implementation of the database.
 type DB struct {
+	ctx      context.Context
 	Client   *bun.DB
 	Migrator *Migrator
 }
 
 // SetupDB sets up the database.
 func SetupDB(ctx context.Context, config config.DBConfig) (*DB, error) {
-	db := &DB{}
+	db := &DB{
+		ctx: ctx,
+	}
 	err := db.Connect(config)
 	if err != nil {
 		return nil, err
 	}
-	db.Migrator, err = NewMigrator(ctx, db)
+	db.Migrator, err = NewMigrator(db)
 	return db, err
 }
 

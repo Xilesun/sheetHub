@@ -8,13 +8,6 @@ import (
 	"github.com/Xilesun/sheethub/infra/logger"
 )
 
-// IApp is the interface that defines the application.
-type IApp interface {
-	Start(ctx context.Context)
-	Install(ctx context.Context) error
-	IsInstalled() bool
-}
-
 // App is the implementation of the application.
 type App struct {
 	ctx context.Context
@@ -22,12 +15,12 @@ type App struct {
 }
 
 // New creates a new application.
-func New() IApp {
+func New() *App {
 	return &App{}
 }
 
-// Start starts the application.
-func (app *App) Start(ctx context.Context) {
+// Init initializes the application.
+func (app *App) Init(ctx context.Context) {
 	conf, err := config.Init()
 	if err != nil {
 		logger.Errorf("Initialize configuration failed: %s", err.Error())
@@ -38,17 +31,8 @@ func (app *App) Start(ctx context.Context) {
 	}
 	app.DB = database
 	app.ctx = ctx
-}
-
-// IsInstalled returns if the application is installed.
-func (app *App) IsInstalled() bool {
-	return true
-}
-
-// Install initializes the application.
-func (app *App) Install(ctx context.Context) error {
-	if app.IsInstalled() {
-		return nil
+	err = app.DB.Migrator.Up()
+	if err != nil {
+		logger.Errorf("Migrate database failed: %s", err.Error())
 	}
-	return app.DB.Migrator.Up(ctx)
 }
