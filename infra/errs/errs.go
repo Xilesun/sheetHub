@@ -12,8 +12,10 @@ const (
 	// ErrCodeUnknown is the unknown error code.
 	ErrCodeUnknown = 1000
 
+	// ErrConfigInit is the error code for configuration initialization.
+	ErrConfigInit = 2001
 	// ErrDBConnect is the error code for database connection.
-	ErrDBConnect = 2001
+	ErrDBConnect = 2002
 )
 
 var errMp = map[int32]string{

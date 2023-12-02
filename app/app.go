@@ -28,9 +28,9 @@ func New() IApp {
 
 // Start starts the application.
 func (app *App) Start(ctx context.Context) {
-	conf, err := config.Read()
+	conf, err := config.Init()
 	if err != nil {
-		logger.Errorf("Read configuration failed: %s", err.Error())
+		logger.Errorf("Initialize configuration failed: %s", err.Error())
 	}
 	database, err := db.SetupDB(ctx, conf.DB)
 	if err != nil {

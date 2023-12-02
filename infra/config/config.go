@@ -4,25 +4,23 @@ import (
 	"sync/atomic"
 
 	"github.com/Xilesun/sheethub/infra/constants"
-	"github.com/Xilesun/sheethub/infra/logger"
+	"github.com/adrg/xdg"
 	"github.com/spf13/viper"
 )
 
 // AppConfig is the configuration for the application.
 type AppConfig struct {
-	Env  string `yaml:"env" env:"ENV"`
-	Port int    `yaml:"port" env:"PORT"`
 }
 
 // DBConfig is the configuration for the database.
 type DBConfig struct {
-	DSN      string            `yaml:"dsn" env:"DSN"`
-	Dialect  constants.Dialect `yaml:"dialect" env:"DIALECT"`
-	Host     string            `yaml:"host" env:"HOST"`
-	Port     int               `yaml:"port" env:"PORT"`
-	Username string            `yaml:"username" env:"USERNAME"`
-	Password string            `yaml:"password" env:"PASSWORD"`
-	Database string            `yaml:"database" env:"DATABASE"`
+	DSN      string            `yaml:"dsn"`
+	Dialect  constants.Dialect `yaml:"dialect"`
+	Host     string            `yaml:"host"`
+	Port     int               `yaml:"port"`
+	Username string            `yaml:"username"`
+	Password string            `yaml:"password"`
+	Database string            `yaml:"database"`
 }
 
 // LogConfig is the configuration for the logger.
@@ -31,35 +29,65 @@ type LogConfig struct {
 
 // Config is the configuration for the application.
 type Config struct {
-	App     AppConfig `yaml:"app" envPrefix:"APP_"`
-	DB      DBConfig  `yaml:"db" envPrefix:"DB_"`
-	Log     LogConfig `yaml:"log" envPrefix:"LOG_"`
-	Storage string    `yaml:"storage" env:"STORAGE"`
+	App AppConfig `yaml:"app"`
+	DB  DBConfig  `yaml:"db"`
+	Log LogConfig `yaml:"log"`
 }
 
 var config *atomic.Value
 
-func init() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-	viper.AutomaticEnv()
+func setDefaultConfig() error {
+	dbFilePath, err := xdg.DataFile(constants.DefaultDBPath)
+	if err != nil {
+		return err
+	}
+	viper.SetDefault("db", map[string]interface{}{
+		"dialect": constants.DialectSQLite,
+		"dsn":     dbFilePath,
+	})
+	return nil
 }
 
-// Read reads the configuration.
-func Read() (*Config, error) {
+// reads the configuration.
+func read() (*Config, error) {
 	cfg := &Config{}
 	config = new(atomic.Value)
 	if err := viper.ReadInConfig(); err != nil {
-		logger.Errorf("Failed to read config file: %v", err)
 		return nil, err
 	}
 	if err := viper.Unmarshal(cfg); err != nil {
-		logger.Errorf("Unable to decode config, %v", err)
 		return nil, err
 	}
 	config.Store(cfg)
 	return config.Load().(*Config), nil
+}
+
+// Init initializes the configuration.
+func Init() (*Config, error) {
+	configFilePath, err := xdg.SearchConfigFile(constants.ConfigPath)
+	if err == nil {
+		viper.SetConfigFile(configFilePath)
+		return read()
+	}
+	err = setDefaultConfig()
+	if err != nil {
+		return nil, err
+	}
+	configFilePath, err = xdg.ConfigFile(constants.AppName)
+	if err != nil {
+		return nil, err
+	}
+	err = viper.SafeWriteConfigAs(configFilePath)
+	if err != nil {
+		return nil, err
+	}
+	viper.SetConfigFile(configFilePath)
+	return read()
+}
+
+// Set sets the configuration.
+func Set(cfg *Config) {
+	config.Store(cfg)
 }
 
 // Get returns the configuration.

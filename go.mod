@@ -3,6 +3,7 @@ module github.com/Xilesun/sheethub
 go 1.20
 
 require (
+	github.com/adrg/xdg v0.4.0
 	github.com/spf13/viper v1.17.0
 	github.com/uptrace/bun v1.1.14
 	github.com/uptrace/bun/dialect/sqlitedialect v1.1.14

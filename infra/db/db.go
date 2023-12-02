@@ -30,25 +30,27 @@ func SetupDB(ctx context.Context, config config.DBConfig) (*DB, error) {
 	return db, err
 }
 
-func (db *DB) getDSN(config config.DBConfig) (string, schema.Dialect, error) {
+func (db *DB) getDSN(config config.DBConfig) (dsn string, driver string, dialect schema.Dialect, err error) {
 	switch config.Dialect {
 	case constants.DialectSQLite:
+		driver := sqliteshim.ShimName
+		dialect := sqlitedialect.New()
 		if config.DSN == "" {
-			return "", sqlitedialect.New(), errs.New(errs.ErrDBConnect, "DSN is required for SQLite")
+			return "", driver, dialect, errs.New(errs.ErrDBConnect, "DSN is required for SQLite")
 		}
-		return config.DSN, nil, nil
+		return config.DSN, driver, dialect, nil
 	default:
-		return "", nil, errs.New(errs.ErrDBConnect, "Unsupported dialect")
+		return "", "", nil, errs.New(errs.ErrDBConnect, "Unsupported dialect")
 	}
 }
 
 // Connect connects to the database.
 func (db *DB) Connect(config config.DBConfig) error {
-	dsn, dialect, err := db.getDSN(config)
+	dsn, driver, dialect, err := db.getDSN(config)
 	if err != nil {
 		return err
 	}
-	sqldb, err := sql.Open(sqliteshim.ShimName, dsn)
+	sqldb, err := sql.Open(driver, dsn)
 	if err != nil {
 		return err
 	}
